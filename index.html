@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rest Countries & OpenWeather App</title>
+</head>
+<body>
+    <div class="container">
+        <div class="row" id="countryCards"></div>
+    </div>
+</body>
+</html>
+// Fetch data from Rest Countries API
+function fetchCountryData() {
+    fetch('https://restcountries.com/v2/all')
+        .then(response => response.json())
+        .then(data => {
+            // Loop through the countries and create cards
+            data.forEach(country => {
+                createCountryCard(country);
+            });
+        })
+        .catch(error => console.error(error));
+}
+
+// Create a Bootstrap card for a country
+function createCountryCard(country) {
+    // Create card elements
+    const card = document.createElement('div');
+    card.classList.add('col-lg-4', 'col-md-6', 'col-sm-12', 'mb-4');
+    card.innerHTML = `
+        <div class="card">
+            <img src="${country.flags.svg}" class="card-img-top" alt="Flag">
+            <div class="card-body">
+                <h5 class="card-title">${country.name}</h5>
+                <p class="card-text">
+                    Region: ${country.region}<br>
+                    Country Code: ${country.alpha2Code}<br>
+                    Capital: ${country.capital}
+                </p>
+                <div id="${country.alpha2Code}Weather"></div>
+            </div>
+        </div>
+    `;
+
+    // Append the card to the container
+    document.getElementById('countryCards').appendChild(card);
+
+    // Fetch weather data using OpenWeather API
+    fetchWeatherData(country.alpha2Code);
+}
+
+// Fetch weather data from OpenWeather API
+function fetchWeatherData(countryCode) {
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${countryCode}&appid=YOUR_OPENWEATHER_API_KEY`)
+        .then(response => response.json())
+        .then(data => {
+            const weatherDiv = document.getElementById(`${countryCode}Weather`);
+            weatherDiv.innerHTML = `
+                Temperature: ${data.main.temp}°C<br>
+                Weather: ${data.weather[0].description}
+            `;
+        })
+        .catch(error => console.error(error));
+}
+
+// Call the function to start fetching country data
+fetchCountryData();
